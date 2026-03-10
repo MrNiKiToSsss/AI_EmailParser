@@ -1,5 +1,4 @@
-<<<<<<< HEAD
-# Email Parser 2.0
+# Email Parser
 
 [![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)]()
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue)]()
@@ -165,7 +164,7 @@ python main.py reprocess
 
 ---
 
-## 🧪 Тестирование
+## 🧪 Тестирование (в папке tests)
 
 ```bash
 # Проверка конфигурации
@@ -182,6 +181,7 @@ python stress_test_reprocess.py
 
 # Параллельный тест (5 потоков)
 python stress_test_concurrent.py
+
 ```
 
 ---
