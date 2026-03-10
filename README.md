@@ -123,7 +123,7 @@ python main.py reprocess
 
 | Файл | Содержание |
 |------|-----------|
-| [DOCUMENTATION.md](DOCUMENTATION.md) | Полная документация |
+| [DOCUMENTATION.md](DOCUMENTATION.md/ALL_Document) | Полная документация |
 | [QUICK_REFERENCE.md](QUICK_REFERENCE.md) | Быстрая справка |
 | [EXAMPLES.md](EXAMPLES.md) | Примеры использования |
 
