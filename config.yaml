@@ -1,0 +1,174 @@
+imap:
+  server:    # IMAP cервер почты (обязательно использовать IMAP адрес)
+  port: 993 # Порт IMAP (менять не нужно)
+  username:   # Логин почты (почта)
+  password: '' # Пароль от почты
+  mailbox: INBOX # Входящие письма (менять не нужно)
+
+storage:
+  emails_dir: ./data/emails
+  results_dir: ./data/results
+  processed_db: ./data/processed.json
+
+# Фильтры спама для автоматического пропуска писем
+spam_filters:
+  enabled: true  # Включить/выключить фильтрацию спама
+  
+  # ===== ФИЛЬТРАЦИЯ ПО СОДЕРЖИМОМУ =====
+  # Расширенные черные списки 
+  subject_blacklist:
+    # Классический спам 
+    - "unsubscribe"
+    - "viagra"
+    - "cialis"
+    - "casino"
+    - "lottery"
+    - "winner"
+    - "click here"
+    - "limited offer"
+    - "act now"
+    - "google.com"
+    - "special offer"
+    - "free money"
+    
+    # Фишинг и мошенства
+    - "verify account"
+    - "urgent action required"
+    - "confirm identity"
+    - "update payment"
+    - "unusual activity"
+    - "suspended account"
+    - "locked account"
+    - "re-verify"
+    - "re-confirm"
+    
+    # Финансовые мошенства
+    - "inherit"
+    - "inheritance"
+    - "nigerian prince"
+    - "claim prize"
+    - "tax refund"
+  
+  body_blacklist:
+    # Классический спам
+    - "unsubscribe"
+    - "viagra"
+    - "cialis"
+    - "casino"
+    - "cryptocurrency"
+    - "bitcoin"
+    - "click here now"
+    - "limited time"
+    - "buy now"
+    - "google.com"
+    - "MicrosoftOutlook"
+    - "xanax"
+    - "phentermine"
+    - "pharmacy"
+    - "cheap drugs"
+    
+    # Фишинг паттерны
+    - "verify your account"
+    - "confirm your credentials"
+    - "update your password"
+    - "reset password"
+    - "click to verify"
+    - "click to confirm"
+    - "act immediately"
+    - "urgent action"
+    - "do not ignore"
+    - "unusual activity detected"
+    - "account suspended"
+    - "account locked"
+    
+    # Финансовые мошенства
+    - "african bank"
+    - "nigerian"
+    - "inheritance money"
+    - "claim your money"
+    - "wire transfer"
+    - "bank account details"
+    - "nigerian prince"
+    - "lottery winner"
+    - "million dollars"
+  
+  sender_blacklist:
+    - "*@spam.com"
+    - "*noreply*"
+    - "notification@*"
+    - "google.com*"
+    - "MicrosoftOutlook"
+    - "*no-reply*"
+    - "*automated*"
+    - "*mailer-daemon*"
+    - "*robot*"
+    - "*bot@*"
+    - "*test@*"
+    - "*fake*"
+  
+  # ===== ФИЛЬТРАЦИЯ ПО КАЧЕСТВУ КОНТАКТА =====
+  min_company_length: 0
+  min_email_count: 0
+  min_contact_info: 0
+  
+  # ===== ФИЛЬТРАЦИЯ ПО ТИПУ ПИСЬМА =====
+  exclude_replies: false
+  exclude_forwards: false
+  
+  # ===== ФИЛЬТРАЦИЯ ПО РАЗМЕРУ =====
+  max_email_size_mb: 1000
+  min_email_size_kb: 0
+  
+  # ===== ЧЕРНЫЙ СПИСОК КОМПАНИЙ =====
+  # Компании которые НЕ должны обрабатываться
+  company_blacklist:
+    - "Google"
+    - "Яндекс"
+    - "Microsoft"
+    - "Apple"
+    - "Amazon"
+    - "Facebook"
+    - "Meta"
+    - "Twitter"
+    - "LinkedIn"
+    - "Instagram"
+    - "YouTube"
+    - "GitHub"
+    - "StackOverflow"
+    - "google.com"
+    - "MicrosoftOutlook"
+  
+  # ===== БЕЛЫЙ СПИСОК КОМПАНИЙ =====
+  # Пустой = все компании разрешены (кроме черного списка)
+  # Если заполнен = только эти компании обрабатываются
+  company_whitelist: []
+  
+  # ===== ПОВТОРНАЯ ПРОВЕРКА =====
+  # Требовать подтверждение перед удалением письма
+  require_review_before_delete: true  # true = сохранять подозрительные письма для проверки
+  review_folder: ./data/review  # Папка для писем на проверку
+  
+  # ===== ПРОДВИНУТЫЙ ФИЛЬТР СПАМА НА ОСНОВЕ НЕЙРОСЕТЕЙ =====
+  # ВКЛЮЧЕН ПО УМОЛЧАНИЮ - более строгая и умная проверка!
+  ml_filter:
+    enabled: true  # Включить/выключить ML-анализ на основе трансформеров
+    
+    # Модель для zero-shot классификации спама
+    # Варианты:
+    # - "facebook/bart-large-mnli" (рекомендуется, самая точная, ~500MB)
+    # - "microsoft/deberta-v3-base" (быстрее, меньше памяти ~200MB, хорошая точность)
+    model: "facebook/bart-large-mnli"
+    
+    # Пороги срабатывания
+    spam_threshold: 0.7  # (0-1) Вероятность спама для базовой классификации (70%)
+    risk_threshold: 60   # (0-100) Риск-скор для блокировки письма (60/100 = HIGH) 
+    
+    # Уровни риска (не изменять!):
+    # - risk_score >= 80: 🔴 CRITICAL     (определённо спам - БЛОКИРОВКА)
+    # - risk_score 60-79: 🟠 HIGH         (вероятно спам - нужна проверка)
+    # - risk_score 40-59: 🟡 MEDIUM       (подозрительное письмо - обработка с предостережением)
+    # - risk_score < 40: 🟢 LOW           (легитимное письмо - обработать нормально) 
+
+ollama:
+  api_url: http://localhost:11434/api/generate # API Ollama server (возможно менять, если Ollama запущен на другом порту или адресе)
+  model: mistral:7b # Рекомендуемая модель для анализа писем

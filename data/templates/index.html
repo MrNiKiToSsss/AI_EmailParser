@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Parser - Просмотр писем</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --dark: #1d3557;
+            --light: #f8f9fa;
+            --danger: #e63946;
+            --gray: #6c757d;
+            --card-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            color: var(--dark);
+            margin-bottom: 10px;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--primary), var(--success));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--gray);
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .search-section {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .search-container {
+            position: relative;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+            font-size: 1.2rem;
+        }
+        
+        #searchInput {
+            width: 100%;
+            padding: 16px 20px 16px 50px;
+            border: 2px solid #e0e6ed;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            transition: var(--transition);
+            background: #f8fafc;
+        }
+        
+        #searchInput:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+        
+        .export-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 16px 24px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(67, 97, 238, 0.4);
+        }
+        
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+        
+        .stat-label {
+            color: var(--gray);
+            font-size: 0.95rem;
+        }
+        
+        .groups-container {
+            display: grid;
+            gap: 25px;
+        }
+        
+        .group {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .group-header {
+            background: linear-gradient(135deg, var(--primary), var(--success));
+            color: white;
+            padding: 20px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .group-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+        }
+        
+        .group-badge {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .group-body {
+            padding: 25px;
+        }
+        
+        .contacts-list {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .contact-card {
+            background: #f8fafc;
+            border-radius: 12px;
+            border-left: 4px solid var(--primary);
+            overflow: hidden;
+        }
+        
+        .contact-header {
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.1), rgba(76, 201, 240, 0.1));
+            padding: 15px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .contact-name {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+        
+        .name-badge {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--dark);
+            white-space: nowrap;
+        }
+        
+        .position-badge {
+            background: rgba(67, 97, 238, 0.15);
+            color: var(--primary);
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        
+        .contact-button {
+            flex-shrink: 0;
+        }
+        
+        .contact-details {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        
+        .detail-label {
+            font-size: 0.85rem;
+            color: var(--gray);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .detail-value {
+            font-size: 1rem;
+            color: var(--dark);
+            word-break: break-word;
+        }
+        
+        .detail-list {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .list-item {
+            background: white;
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 0.95rem;
+            color: var(--dark);
+            border: 1px solid #e0e6ed;
+            word-break: break-all;
+        }
+
+        
+        .view-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .view-btn:hover {
+            background: var(--secondary);
+        }
+        
+        .no-results {
+            background: white;
+            border-radius: 16px;
+            padding: 60px 30px;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .no-results i {
+            font-size: 4rem;
+            color: #cbd5e0;
+            margin-bottom: 20px;
+        }
+        
+        .no-results h3 {
+            font-size: 1.8rem;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+        
+        .no-results p {
+            color: var(--gray);
+            font-size: 1rem;
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+        
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow: hidden;
+            transform: scale(0.9);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .modal.active .modal-content {
+            transform: scale(1);
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 20px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+        
+        .close-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .modal-body {
+            padding: 25px;
+            overflow-y: auto;
+            flex-grow: 1;
+            background: #1e1e1e;
+            font-family: 'Fira Code', monospace;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #d4d4d4;
+        }
+        
+        .highlight {
+            background-color: #ffeb3b;
+            color: #000;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .search-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .group-info {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-envelope"></i> Email Parser</h1>
+            <p class="subtitle">Группированный просмотр и поиск по письмам</p>
+        </header>
+        
+        <div class="search-section">
+            <div class="search-container">
+                <i class="search-icon fas fa-search"></i>
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    placeholder="Поиск по компании, товару, ФИО, email или телефону..."
+                >
+            </div>
+            <button class="export-btn" onclick="exportExcel()">
+                <i class="fas fa-download"></i> Экспорт в Excel
+            </button>
+        </div>
+        
+        <div class="stats-section">
+            <div class="stat-card">
+                <div class="stat-value" id="groupCount">0</div>
+                <div class="stat-label">Групп</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="fileCount">0</div>
+                <div class="stat-label">Писем</div>
+            </div>
+        </div>
+        
+        <div class="groups-container" id="groupsContainer"></div>
+    </div>
+    
+    <div class="modal" id="jsonModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Содержимое файла</div>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="jsonContent"></div>
+        </div>
+    </div>
+    
+    <script>
+        let currentQuery = '';
+        let lastGroups = [];
+        
+        function loadFiles() {
+            const url = currentQuery ? `/search?q=${encodeURIComponent(currentQuery)}` : '/files';
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(groups => {
+                    lastGroups = groups || [];
+                    renderGroups(lastGroups);
+                    updateStats();
+                })
+                .catch(error => {
+                    console.error('Ошибка загрузки файлов:', error);
+                    document.getElementById('groupsContainer').innerHTML = `
+                        <div class="no-results">
+                            <i class="fas fa-exclamation-circle" style="color: #e63946;"></i>
+                            <h3>Ошибка загрузки</h3>
+                            <p>${error.message}</p>
+                        </div>
+                    `;
+                });
+        }
+        
+        function updateStats() {
+            let totalFiles = 0;
+            lastGroups.forEach(group => {
+                totalFiles += (group.files || []).length;
+            });
+            document.getElementById('groupCount').textContent = lastGroups.length;
+            document.getElementById('fileCount').textContent = totalFiles;
+        }
+        
+        function renderGroups(groups) {
+            const container = document.getElementById('groupsContainer');
+            
+            if (!Array.isArray(groups) || groups.length === 0) {
+                container.innerHTML = `
+                    <div class="no-results">
+                        <i class="fas fa-inbox"></i>
+                        <h3>Нет писем с компаниями</h3>
+                        <p>Загрузите письма из IMAP с помощью python main.py parse</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            groups.forEach(group => {
+                const files = group.files || [];
+                if (files.length === 0) return;
+                
+                const groupEl = document.createElement('div');
+                groupEl.className = 'group';
+                
+                groupEl.innerHTML = `
+                    <div class="group-header">
+                        <div class="group-title">${group.group_name}</div>
+                        <div class="group-badge">${files.length} писем</div>
+                    </div>
+                    <div class="group-body">
+                        <div class="contacts-list">
+                            ${files.map((file, idx) => {
+                                const nameDisplay = file.full_name || 'Имя не указано';
+                                const posDisplay = file.position || 'Должность не указана';
+                                const companyDisplay = file.company || 'Компания не указана';
+                                const emailList = Array.isArray(file.emails) ? file.emails : [file.emails];
+                                const phoneList = Array.isArray(file.phones) ? file.phones : [file.phones];
+                                const productDisplay = file.product || 'Товар не указан';
+                                
+                                return `
+                                    <div class="contact-card">
+                                        <div class="contact-header">
+                                            <div class="contact-name">
+                                                <span class="name-badge">👤 ${nameDisplay}</span>
+                                                <span class="position-badge">${posDisplay}</span>
+                                            </div>
+                                            <div class="contact-button">
+                                                <button class="view-btn" onclick="viewFile('${file.filename}')">
+                                                    Просмотр
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="contact-details">
+                                            <div class="detail-item">
+                                                <span class="detail-label">🏢 Компания:</span>
+                                                <span class="detail-value">${companyDisplay}</span>
+                                            </div>
+                                            
+                                            <div class="detail-item">
+                                                <span class="detail-label">📧 Email:</span>
+                                                <div class="detail-list">
+                                                    ${emailList.filter(e => e).map(e => `<div class="list-item">${e}</div>`).join('')}
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="detail-item">
+                                                <span class="detail-label">📱 Телефон:</span>
+                                                <div class="detail-list">
+                                                    ${phoneList.filter(p => p).map(p => `<div class="list-item">${p}</div>`).join('')}
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="detail-item">
+                                                <span class="detail-label">📦 Товар/Услуга:</span>
+                                                <span class="detail-value">${productDisplay}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(groupEl);
+            });
+        }
+        
+        function viewFile(filename) {
+            fetch(`/file/${filename}`)
+                .then(response => response.json())
+                .then(data => {
+                    const jsonString = JSON.stringify(data, null, 2);
+                    document.getElementById('jsonContent').textContent = jsonString;
+                    document.getElementById('jsonModal').classList.add('active');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('jsonContent').textContent = `Ошибка: ${error.message}`;
+                    document.getElementById('jsonModal').classList.add('active');
+                });
+        }
+        
+        function exportExcel() {
+            const query = currentQuery || '';
+            window.location.href = `/export?q=${encodeURIComponent(query)}`;
+        }
+        
+        function closeModal() {
+            document.getElementById('jsonModal').classList.remove('active');
+        }
+        
+        function handleSearch() {
+            const newQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+            if (newQuery !== currentQuery) {
+                currentQuery = newQuery;
+                loadFiles();
+            }
+        }
+        
+        // Закрыть модальное окно при клике вне его
+        document.getElementById('jsonModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('jsonModal')) {
+                closeModal();
+            }
+        });
+        
+        document.getElementById('searchInput').addEventListener('input', () => {
+            clearTimeout(window.searchTimeout);
+            window.searchTimeout = setTimeout(handleSearch, 500);
+        });
+        
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                clearTimeout(window.searchTimeout);
+                handleSearch();
+            }
+        });
+        
+        window.onload = loadFiles;
+    </script>
+</body>
+</html>
